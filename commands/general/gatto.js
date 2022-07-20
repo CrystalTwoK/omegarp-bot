@@ -3,13 +3,13 @@ const embedMessage = require("../../discord/embedMessage");
 
 module.exports = {
   data: new SlashCommandBuilder()
-    .setName("kitty")
-    .setDescription("Sends a random kitty photo!"),
+    .setName("gatto")
+    .setDescription("Invia una foto casuale di un gatto"),
   async execute(interaction) {
     try {
       embedMessage.kitty(interaction);
     } catch (e) {
-      console.log(log.error + " [kitty.js/execute()]" + e);
+      console.log(log.error + " [gatto.js/execute()]" + e);
     }
   },
 };

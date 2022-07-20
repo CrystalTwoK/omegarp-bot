@@ -11,6 +11,9 @@ const config = require("../../config.json");
 if (config.export_type == "json") {
   console.log(`Export type: JSON`);
   var messageHistory = new Array();
+} else if (config.export_type == "html") {
+  console.log(`Export type: html`);
+  var messageHistory = "";
 } else {
   console.log(`Export type: md`);
   var messageHistory = "";
@@ -43,7 +46,6 @@ function printAllMessages(channelId, before) {
       message.each((key, value) => {
         // console.log(`${key.content} | ${key.author.username}#${key.author.discriminator} | ${key.id}`);
         const currentMessage = new Structures.MessageStructureInJSON(key);
-        console.log(currentMessage);
 
         if (config.export_type == "json") messageHistory.push(currentMessage);
         else if (config.export_type == "md")

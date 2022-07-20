@@ -1,36 +1,53 @@
 const MongoClient = require("mongodb").MongoClient;
-const dbClient = new MongoClient(db);
+require("dotenv").config();
+const dbClient = new MongoClient(process.env.db);
 
 const commandsInit = async (guildId) => {
   try {
     //Reset Global Variables
     global.choicesArray = [];
-    global.countersArray = [];
+    global.giveawayArray = [];
+    global.closedGiveawayArray = [];
+    global.activeGiveawayArray = [];
     global.commands = [];
     await dbClient.connect();
     const database = dbClient.db(`OMEGA_${guildId}`);
-    const factions = database.collection("OMEGA_Factions");
-    const counters = database.collection("OMEGA_Counters");
+    const giveaways = database.collection("OMEGA_Giveaways");
 
-    await factions
-      .find()
+    //get all giveaways
+    await giveaways
+      .find({ isClosed: false, isActive: false })
       .toArray()
       .then((results) => {
         for (const record of results) {
-          global.choicesArray.push({
-            name: record.faction,
+          global.giveawayArray.push({
+            name: record.name,
             value: record._id.toHexString(),
           });
         }
       });
 
-    await counters
-      .find()
+    //get all closed giveaway
+    await giveaways
+      .find({ isClosed: true })
       .toArray()
       .then((results) => {
         for (const record of results) {
-          global.countersArray.push({
-            name: record.label,
+          global.closedGiveawayArray.push({
+            name: record.name,
+            value: record._id.toHexString(),
+          });
+        }
+      });
+
+    //get all active giveaways
+    await giveaways
+      .find({ isActive: true })
+      .toArray()
+      .then((results) => {
+        for (const record of results) {
+          global.activeGiveawayArray.push({
+            name: record.name,
             value: record._id.toHexString(),
           });
         }

@@ -9,6 +9,7 @@ const MongoClient = require("mongodb").MongoClient;
 const Discord = require("discord.js");
 const embedMessage = require("./discord/embedMessage");
 const { counterUpdate } = require("./events/guildCounter");
+const { onJoin, onLeave } = require("./handlers/welcome");
 
 global.token = process.env.token;
 global.db = process.env.db;
@@ -86,30 +87,19 @@ setInterval(() => {
 client.on("guildMemberAdd", (member) => {
   const guild = member.guild;
   counterUpdate(guild);
+  onJoin(member);
 });
 
 client.on("guildMemberRemove", (member) => {
   const guild = member.guild;
   counterUpdate(guild);
+  onLeave(member);
 });
 
-// client.on("messageCreate", (msg) => {
-//   const insideTicket = msg.channel.name.startsWith("ticket-");
-//   //checks if the user is writing inside the Ticket
-
-//   if (insideTicket) {
-//     const date = dateUpdate(msg.createdTimestamp);
-//     const messageCache = `\n[${date}] ${msg.author.username}: ${msg.content} ${printAttachments}`;
-//     updateTicket(msg.channelId, msg.author.username, msg.content);
-//     if (msg.attachments) {
-//       // if the message contains attachments, these will be included in the Messages Log
-//       let attachments = msg.attachments;
-//       for (let file of attachments) {
-//         printAttachments =
-//           printAttachments + `\n └[attachments]: ${file[1].url}`;
-//         /*Through a global variable (messageCache and printAttachments) i contain every information and then
-//         insert it in the Database in order to have everything stored in a temporary and safe storage */
-//       }
-//     }
-//   }
-// });
+client.on("messageCreate", (msg) => {
+  const { isAdmin } = require("./handlers/isAdmin");
+  if (msg.content == "!provajoin" && isAdmin(msg)) {
+    onJoin(msg.member);
+    onLeave(msg.member);
+  }
+});

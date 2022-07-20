@@ -6,6 +6,7 @@ const db = process.env.db;
 const dbClient = new MongoClient(db);
 let ObjectId = require("mongodb").ObjectId;
 const axios = require("axios").default;
+const { commandsInit } = require("../events/commandsInit");
 
 module.exports = {
   async faction(interaction) {
@@ -93,7 +94,7 @@ module.exports = {
       apiImage = res.data[0].url;
       const embed = new Discord.MessageEmbed()
         .setColor("#fec814")
-        .setTitle("Here is a cute kitty pic for you!")
+        .setTitle("Ecco a te la foto di un gatto!")
         .setImage(apiImage)
         .setFooter({
           text: `© 2022 - OMEGA - System`,
@@ -207,4 +208,136 @@ module.exports = {
 
     await interaction.user.send({ embeds: [embed] });
   },
+
+  async verify(interaction, titolo, descrizione) {
+    const embed = new Discord.MessageEmbed()
+      .setColor("#fec814")
+      .setTitle(titolo)
+      .setDescription(descrizione)
+      .setThumbnail("https://i.imgur.com/RyOd1TC.png")
+      .setFooter({
+        text: `© 2022 - OMEGA - System`,
+        iconURL: `https://i.imgur.com/RyOd1TC.png`,
+      });
+
+    const button = new MessageActionRow().addComponents(
+      new MessageButton()
+        .setCustomId("verifica")
+        .setLabel("VERIFICA")
+        .setStyle("SECONDARY")
+        .setEmoji("✅")
+    );
+
+    await interaction.channel.send({ embeds: [embed], components: [button] });
+  },
+
+  async regolamento(interaction, titolo, descrizione) {
+    const embed = new Discord.MessageEmbed()
+      .setColor("#fec814")
+      .setTitle(titolo)
+      .setDescription(descrizione)
+      // .setThumbnail(
+      //   "http://omegarp.andreamarucci.com/assets/images/icone/global_ruleset.png"
+      // )
+      .addFields(
+        { name: "\u200B", value: "\u200B" },
+        {
+          name: "Termini di Servizio di Discord",
+          value: "[Leggi](https://discord.com/guidelines)",
+          inline: true,
+        },
+        {
+          name: "Linee Guida Server di Discord",
+          value:
+            "[Leggi](https://support.discord.com/hc/it/articles/360035969312)",
+          inline: true,
+        },
+        {
+          name: "Regole dei Termini d'età",
+          value:
+            "[Leggi](https://support.discord.com/hc/it/articles/360040724612-Why-is-Discord)",
+          inline: true,
+        }
+      )
+      .setImage("https://i.imgur.com/q9DivXt.png")
+      .setFooter({
+        text: `© 2022 - OMEGA - System`,
+        iconURL: `https://i.imgur.com/RyOd1TC.png`,
+      });
+
+    const button = new MessageActionRow().addComponents(
+      new MessageButton()
+        .setCustomId("accetta_regolamento")
+        .setLabel("ACCETTA REGOLAMENTO")
+        .setStyle("SECONDARY")
+        .setEmoji("📄")
+    );
+
+    interaction.channel.send({
+      embeds: [embed],
+      components: [button],
+    });
+  },
+
+  async giveaway(interaction, titolo, descrizione, emoji, choice) {
+    const embed = new Discord.MessageEmbed()
+      .setColor("#fec814")
+      .setTitle(titolo)
+      .setDescription(descrizione)
+      .setThumbnail("https://i.imgur.com/RyOd1TC.png")
+      .setFooter({
+        text: `© 2022 - OMEGA - Giveaway`,
+        iconURL: `https://i.imgur.com/RyOd1TC.png`,
+      });
+
+    await interaction.channel.send({ embeds: [embed] }).then((m) => {
+      m.react(emoji);
+      console.log(emoji);
+      activateGiveaway(interaction, m.id, m.channelId, choice);
+    });
+  },
+
+  // async partecipantiGiveaway(interaction, titolo, descrizione, emoji, choice) {
+  //   const embed = new Discord.MessageEmbed()
+  //     .setColor("#fec814")
+  //     .setTitle(titolo)
+  //     .setDescription(descrizione)
+  //     .setThumbnail("https://i.imgur.com/RyOd1TC.png")
+  //     .setFooter({
+  //       text: `© 2022 - OMEGA - Giveaway`,
+  //       iconURL: `https://i.imgur.com/RyOd1TC.png`,
+  //     });
+
+  //   await interaction.channel.send({ embeds: [embed] }).then((m) => {
+  //     m.react(emoji);
+  //     console.log(emoji);
+  //     activateGiveaway(interaction, m.id, m.channelId, choice);
+  //   });
+  // },
+};
+
+const activateGiveaway = async (interaction, messageId, channelId, choice) => {
+  //db
+  await dbClient.connect();
+  const database = dbClient.db(`OMEGA_${interaction.guild.id}`);
+  const giveaways = database.collection("OMEGA_Giveaways");
+
+  try {
+    const query = { isClosed: false, isActive: false, _id: ObjectId(choice) };
+
+    await giveaways.findOneAndUpdate(query, {
+      $set: {
+        isActive: true,
+        messageId: messageId,
+        channelId: channelId,
+      },
+    });
+
+    commandsInit(interaction.guildId);
+    console.log(
+      `${log.system} Giveaway attivato da ${interaction.user.username}#${interaction.user.discriminator}`
+    );
+  } catch (e) {
+    console.log(log.error + e);
+  }
 };
