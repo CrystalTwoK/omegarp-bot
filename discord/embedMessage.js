@@ -231,6 +231,28 @@ module.exports = {
     await interaction.channel.send({ embeds: [embed], components: [button] });
   },
 
+  async play(interaction, titolo, descrizione) {
+    const embed = new Discord.MessageEmbed()
+      .setColor("#fec814")
+      .setTitle(titolo)
+      .setDescription(descrizione)
+      .setThumbnail("https://i.imgur.com/RyOd1TC.png")
+      .setFooter({
+        text: `© 2022 - OMEGA - System`,
+        iconURL: `https://i.imgur.com/RyOd1TC.png`,
+      });
+
+    const button = new MessageActionRow().addComponents(
+      new MessageButton()
+        .setLabel("GIOCA")
+        .setStyle("SUCCESS")
+        .setURL("fivem://connect/cfx.re/join/earr7b")
+        .setEmoji("🕹️")
+    );
+
+    await interaction.channel.send({ embeds: [embed], components: [button] });
+  },
+
   async regolamento(interaction, titolo, descrizione) {
     const embed = new Discord.MessageEmbed()
       .setColor("#fec814")
