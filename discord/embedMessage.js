@@ -244,9 +244,10 @@ module.exports = {
 
     const button = new MessageActionRow().addComponents(
       new MessageButton()
+        // .setCustomId("gioca")
         .setLabel("GIOCA")
-        .setStyle("SUCCESS")
-        .setURL("fivem://connect/cfx.re/join/earr7b")
+        .setStyle("LINK")
+        .setURL("http://omegarp.it/play.html")
         .setEmoji("🕹️")
     );
 
